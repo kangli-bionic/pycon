@@ -1,16 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import print_function
-
-# TODO: i18n
-print("Hello world!")
+from library import anxiety, despair
 
 
-def foo():
-    # todo: i18n
-    # nothing to see here
-    print("Happy foo day!")
+def mood():
+    anxiety("politics")
+    despair()
 
 
-if __name__ == '__main__':
-    foo()
+if __name__ == "__main__":
+    mood()

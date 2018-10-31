@@ -3,45 +3,96 @@
 # Licensed under the MIT License
 
 import re
-from bowler.helpers import print_tree
+from bowler.helpers import print_tree, find_first
 from bowler.query import Query
-from bowler.types import TOKEN
-from fissix.fixer_util import Call, Name
+from bowler.types import TOKEN, SYMBOL, Node
+from fissix.fixer_util import Call, Dot, Name, LParen, RParen, String, FromImport, Newline
 
-todo_re = re.compile(r"# todo: i18n.*\n\s*", flags=re.I)
+def add_import(ln, cap, fn):
+    while ln.parent is not None:
+        ln = ln.parent
 
-
-def takes_string(ln, cap, fn):
-    args = cap.get('function_arguments')
-    return args[0].type == TOKEN.STRING
-
-
-def translate_string(ln, cap, fn):
-    # wrap string in a call to tr()
-    args = cap.get('function_arguments')
-    args[0].replace(
-        Call(
-            Name("tr"),
-            args=[args[0].clone()]
-        ),
+    first_node = ln.children[0]
+    new_import = Node(
+        SYMBOL.simple_stmt,
+        [
+            FromImport("asyncio", [Name("run", prefix=" ")]),
+            Newline(),
+        ],
+        prefix=first_node.prefix,
     )
 
-    # drop a leading comment
-    while not ln.prefix:
-        prev = ln.prev_sibling
-        if prev is None and ln.parent is None:
-            break
-        ln = prev or ln.parent
-    ln.prefix = todo_re.sub("", ln.prefix)
-
+    first_node.prefix = ""
+    ln.insert_child(0, new_import)
 
 (
     Query("source.py")
-    .select_function("print")
+    .select_function("runner")
     .is_call()
-    .filter(takes_string)
-    .modify(translate_string)
-    .select_function("foo")
-    .add_argument("bar", 123)
+    .modify(add_import)
+    .rename("run")
+    .select_function("runner")
+    .is_def()
+    .modify(lambda ln, cap, fn: ln.remove())
+    # .diff()
+)
+
+(
+    Query()
+    .select_function("anxiety")
+    .rename("consider")
+    .modify_argument(
+        name="count", default_value="5",
+    )
+    # .diff()
+)
+
+(
+    Query()
+    .select_function("anxiety")
+    .rename("consider")
+    .modify_argument(
+        name="count", default_value="5",
+    )
+    .select_function("despair")
+    .rename("take_action")
+    .add_argument(
+        name="action", value='"vote"',
+        positional=True, type_annotation="str",
+    )
+    # .diff()
+)
+
+def fix_despair(ln, cap, fn):
+    stmt = find_first(ln, SYMBOL.simple_stmt, recursive=True)
+    if stmt:
+        new_call = Call(
+            Name("print"),
+            args=[
+                String('f"Go {action}!!!"')
+            ],
+        )
+        stmt.replace(
+            Node(
+                SYMBOL.simple_stmt,
+                children=[new_call],
+            )
+        )
+
+
+(
+    Query()
+    .select_function("anxiety")
+    .rename("consider")
+    .modify_argument(
+        name="count", default_value="5",
+    )
+    .select_function("despair")
+    .rename("take_action")
+    .add_argument(
+        name="action", value='"vote"',
+        positional=True, type_annotation="str",
+    )
+    .modify(fix_despair)
     .diff()
 )
