@@ -1,3 +1,4 @@
+import asyncio
 import time
 
 
@@ -9,7 +10,10 @@ def timed(fn, *args, **kwargs):
 
     while duration < 1.0:
         count += 1
-        fn(*args, **kwargs)
+        if asyncio.iscoroutinefunction(fn):
+            asyncio.run(fn(*args, **kwargs))
+        else:
+            fn(*args, **kwargs)
         duration = time.time() - before
 
     avg = duration / count

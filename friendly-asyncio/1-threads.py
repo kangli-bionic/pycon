@@ -2,7 +2,7 @@ from multiprocessing import Pool as ProcessPool
 from multiprocessing.dummy import Pool as ThreadPool
 from common import timed
 
-NUM_WORKERS = 12  # six cores
+NUM_WORKERS = 8  # four cores
 
 
 def fib(n):
@@ -14,22 +14,25 @@ def fib(n):
     return a
 
 
-def fibs(n, x):
-    """Calculate x copies of Fibonacci in series."""
-    return [fib(n) for _ in range(x)]
+timed(fib, 5000)
+
+ELEMENTS = [i * 1000 for i in range(1, NUM_WORKERS + 1)]
 
 
-def fibp(n, x, pool):
-    """Calculate x copies of Fibonacci in parallel using the supplied executor."""
-    return list(pool.map(fib, [n] * x))
+def fibs():
+    """Calculate elements of Fibonacci in series."""
+    return [fib(n) for n in ELEMENTS]
+
+
+def fibp(pool):
+    """Calculate elements of Fibonacci in parallel."""
+    return list(pool.map(fib, ELEMENTS))
 
 
 with ThreadPool(NUM_WORKERS) as pool:
-    assert fibs(10, 2) == fibp(10, 2, pool)
-    timed(fibs, 5000, NUM_WORKERS)
-    timed(fibp, 5000, NUM_WORKERS, pool)
+    timed(fibs)
+    timed(fibp, pool)
 
 with ProcessPool(NUM_WORKERS) as pool:
-    assert fibs(10, 2) == fibp(10, 2, pool)
-    timed(fibs, 5000, NUM_WORKERS)
-    timed(fibp, 5000, NUM_WORKERS, pool)
+    timed(fibs)
+    timed(fibp, pool)
