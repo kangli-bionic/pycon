@@ -12,7 +12,6 @@ async def get_random(n):
     return value
 
 
-print(asyncio.run(get_random(20)))
 timed(get_random, 20)
 
 

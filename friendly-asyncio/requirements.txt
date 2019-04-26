@@ -1,3 +1,4 @@
-aiosqlite
+aiohttp
 aioitertools
+aiosqlite
 aiounittest
