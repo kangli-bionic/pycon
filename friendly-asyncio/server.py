@@ -1,5 +1,8 @@
 import asyncio
+import uvloop
 from random import randint
+
+uvloop.install()
 
 
 async def serve_randint(reader, writer):
