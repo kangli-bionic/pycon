@@ -29,7 +29,7 @@ async def nap(n):
 # asyncio.run(nap(2))
 
 
-async def random(n=20):
+async def get_random(n=20):
     r, w = await asyncio.open_connection("::1", 8080)
     w.write(f"{n}\n".encode("utf-8"))
     await w.drain()
@@ -40,7 +40,7 @@ async def random(n=20):
 
 
 async def main():
-    values = await asyncio.gather(random(), random())
+    values = await asyncio.gather(get_random(), get_random())
     print(f"gather two: {values}")
     futures = [random() for _ in range(10)]
     values = await asyncio.gather(*futures)

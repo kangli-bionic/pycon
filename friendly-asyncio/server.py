@@ -21,11 +21,11 @@ async def serve_randint(reader, writer):
     writer.close()
 
 
-async def main(port):
-    server = await asyncio.start_server(serve_randint, host="::1", port=port)
+async def main():
+    server = await asyncio.start_server(serve_randint, host="::1", port=8080)
     async with server:
         print(f"listening on {port}...")
         await server.serve_forever()
 
 
-asyncio.run(main(8080))
+asyncio.run(main())
