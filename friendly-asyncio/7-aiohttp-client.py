@@ -7,7 +7,7 @@ async def get_random(n):
     url = f"http://0.0.0.0:8080/randint/{n}"
     async with ClientSession() as session:
         async with session.get(url) as response:
-            return int(await response.text())
+            return response.status, int(await response.text())
 
 
 value = asyncio.run(get_random(20))
