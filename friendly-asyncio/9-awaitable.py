@@ -44,6 +44,9 @@ async def main():
     async for value in MultiRandom(20, 5):
         print(value)
 
+    values = [v async for v in MultiRandom(40, 3)]
+    print(values)
+
 
 asyncio.run(main())
 

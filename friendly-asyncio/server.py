@@ -2,7 +2,7 @@ import asyncio
 import uvloop
 from random import randint
 
-uvloop.install()
+# uvloop.install()
 
 
 async def serve_randint(reader, writer):
@@ -21,8 +21,8 @@ async def serve_randint(reader, writer):
     writer.close()
 
 
-async def main():
-    server = await asyncio.start_server(serve_randint, host="::1", port=8080)
+async def main(port=8080):
+    server = await asyncio.start_server(serve_randint, host="::1", port=port)
     async with server:
         print(f"listening on {port}...")
         await server.serve_forever()
